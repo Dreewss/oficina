@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="style.css">
     <link rel="icon" href="http://www.w3.org/2000/svg" type="image/svg+xml">
 </head>
 <body>
@@ -115,7 +115,7 @@
             <div class="tab-content" id="ordens">
                 <div class="page-header">
                     <h2>Ordens de Serviço</h2>
-                    <button class="btn-primary">Nova Ordem</button>
+                    <button class="btn-primary" onclick="openPopup('popup-nova-ordem')">Nova Ordem</button>
                 </div>
                 <div class="search-bar">
                     <input type="text" placeholder="Buscar ordem de serviço...">
@@ -169,7 +169,7 @@
             <div class="tab-content" id="veiculos">
                 <div class="page-header">
                     <h2>Veículos</h2>
-                    <button class="btn-primary">Novo Veículo</button>
+                    <button class="btn-primary" onclick="openPopup('popup-novo-veiculo')">Novo Veículo</button>
                 </div>
                 <div class="search-bar">
                     <input type="text" placeholder="Buscar veículo...">
@@ -232,7 +232,7 @@
             <div class="tab-content" id="clientes">
                 <div class="page-header">
                     <h2>Clientes</h2>
-                    <button class="btn-primary">Novo Cliente</button>
+                    <button class="btn-primary" onclick="openPopup('popup-novo-cliente')">Novo Cliente</button>
                 </div>
                 <div class="search-bar">
                     <input type="text" placeholder="Buscar cliente...">
@@ -271,7 +271,7 @@
             <div class="tab-content" id="estoque">
                 <div class="page-header">
                     <h2>Estoque</h2>
-                    <button class="btn-primary">Novo Item</button>
+                    <button class="btn-primary" onclick="openPopup('popup-novo-item')">Novo Item</button>
                 </div>
                 <div class="search-bar">
                     <input type="text" placeholder="Buscar item...">
@@ -330,7 +330,153 @@
         </main>
     </div>
 
+    <!-- Popups -->
+    <div id="popup-overlay" class="popup-overlay">
+        <!-- Popup para Nova Ordem de Serviço -->
+        <div id="popup-nova-ordem" class="popup">
+            <h2>Nova Ordem de Serviço</h2>
+            <form id="form-nova-ordem">
+                <label for="os">OS:</label>
+                <input type="text" id="os" name="os" required>
+
+                <label for="data">Data:</label>
+                <input type="date" id="data" name="data" required>
+
+                <label for="cliente">Cliente:</label>
+                <select id="cliente" name="cliente" required>
+                    <option value="">Selecione um cliente</option>
+                    <!-- Opções de clientes serão preenchidas dinamicamente -->
+                </select>
+
+                <label for="veiculo">Veículo:</label>
+                <select id="veiculo" name="veiculo" required>
+                    <option value="">Selecione um veículo</option>
+                    <!-- Opções de veículos serão preenchidas dinamicamente -->
+                </select>
+
+                <label for="servico">Serviço:</label>
+                <input type="text" id="servico" name="servico" required>
+
+                <label for="valor">Valor:</label>
+                <input type="number" id="valor" name="valor" required>
+
+                <label for="status">Status:</label>
+                <select id="status" name="status" required>
+                    <option value="em-andamento">Em Andamento</option>
+                    <option value="aguardando">Aguardando</option>
+                    <option value="concluido">Concluído</option>
+                </select>
+
+                <button type="submit">Salvar</button>
+            </form>
+            <button class="btn-close" onclick="closePopup('popup-nova-ordem')">Fechar</button>
+        </div>
+
+        <!-- Popup para Novo Veículo -->
+        <div id="popup-novo-veiculo" class="popup">
+            <h2>Novo Veículo</h2>
+            <form id="form-novo-veiculo">
+                <label for="marca">Marca:</label>
+                <input type="text" id="marca" name="marca" required>
+
+                <label for="placa">Placa:</label>
+                <input type="text" id="placa" name="placa" required>
+
+                <label for="cliente-veiculo">Cliente:</label>
+                <select id="cliente-veiculo" name="cliente-veiculo" required>
+                    <option value="">Selecione um cliente</option>
+                    <!-- Opções de clientes serão preenchidas dinamicamente -->
+                </select>
+
+                <label for="data-veiculo">Data:</label>
+                <input type="date" id="data-veiculo" name="data-veiculo" required>
+
+                <button type="submit">Salvar</button>
+            </form>
+            <button class="btn-close" onclick="closePopup('popup-novo-veiculo')">Fechar</button>
+        </div>
+
+        <!-- Popup para Novo Cliente -->
+        <div id="popup-novo-cliente" class="popup">
+            <h2>Novo Cliente</h2>
+            <form id="form-novo-cliente">
+                <label for="nome">Nome:</label>
+                <input type="text" id="nome" name="nome" required>
+
+                <label for="cpf">CPF:</label>
+                <input type="text" id="cpf" name="cpf" required>
+
+                <label for="telefone">Telefone:</label>
+                <input type="text" id="telefone" name="telefone" required>
+
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+
+                <label for="quantidade-veiculos">Quantidade de Veículos:</label>
+                <input type="number" id="quantidade-veiculos" name="quantidade-veiculos" required>
+
+                <button type="submit">Salvar</button>
+            </form>
+            <button class="btn-close" onclick="closePopup('popup-novo-cliente')">Fechar</button>
+        </div>
+
+        <!-- Popup para Novo Item no Estoque -->
+        <div id="popup-novo-item" class="popup">
+            <h2>Novo Item no Estoque</h2>
+            <form id="form-novo-item">
+                <label for="item">Item:</label>
+                <input type="text" id="item" name="item" required>
+
+                <label for="categoria">Categoria:</label>
+                <select id="categoria" name="categoria" required>
+                    <option value="">Selecione uma categoria</option>
+                    <option value="filtros">Filtros</option>
+                    <option value="pastilhas">Pastilhas</option>
+                    <option value="suspencao">Suspenção</option>
+                    <option value="velas">Velas</option>
+                    <option value="correias">Correias</option>
+                    <option value="rolamentos">Rolamentos e buchas</option>
+                    <option value="baterias">Baterias</option>
+                    <option value="parafusos">Parafusos</option>
+                    <option value="oleos">Óleos e Fluidos</option>
+                    <option value="acessorios">Acessórios</option>
+                </select>
+
+                <label for="quantidade">Quantidade:</label>
+                <input type="number" id="quantidade" name="quantidade" required>
+
+                <button type="submit">Salvar</button>
+            </form>
+            <button class="btn-close" onclick="closePopup('popup-novo-item')">Fechar</button>
+        </div>
+    </div>
+
     <script>
+        // Função para abrir popups
+        function openPopup(popupId) {
+            const popupOverlay = document.getElementById('popup-overlay');
+            const popups = document.querySelectorAll('.popup');
+
+            // Oculta todos os popups
+            popups.forEach(popup => {
+                popup.style.display = 'none';
+            });
+
+            // Exibe o popup desejado
+            const popup = document.getElementById(popupId);
+            popupOverlay.style.display = 'flex';
+            popup.style.display = 'block';
+        }
+
+        // Função para fechar popups
+        function closePopup(popupId) {
+            const popupOverlay = document.getElementById('popup-overlay');
+            const popup = document.getElementById(popupId);
+
+            popupOverlay.style.display = 'none';
+            popup.style.display = 'none';
+        }
+
         // Navegação entre abas
         document.querySelectorAll('.menu-item').forEach(item => {
             item.addEventListener('click', (e) => {
