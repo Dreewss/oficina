@@ -4,11 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="http://www.w3.org/2000/svg" type="image/svg+xml">
+    <link rel="stylesheet" href="styles.css">
+    <!-- Fixed favicon link -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z'/></svg>" type="image/svg+xml">
 </head>
 <body>
     <div class="layout">
+        <!-- Menu móvel -->
+        <input type="checkbox" id="menu-toggle" class="menu-toggle">
+        <label for="menu-toggle" class="menu-button">
+            <span></span>
+            <span></span>
+            <span></span>
+        </label>
+        
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="logo">
@@ -16,7 +25,7 @@
                 <h1>AutoParts</h1>
             </div>
             <nav class="menu">
-                <a href="#dashboard" class="menu-item" data-tab="dashboard">
+                <a href="#dashboard" class="menu-item active" data-tab="dashboard">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="m19 9-5 5-4-4-3 3"></path></svg>
                     Dashboard
                 </a>
@@ -38,14 +47,6 @@
                 </a>
             </nav>
         </aside>
-
-        <!-- Menu móvel -->
-        <input type="checkbox" id="menu-toggle" class="menu-toggle">
-        <label for="menu-toggle" class="menu-button">
-            <span></span>
-            <span></span>
-            <span></span>
-        </label>
 
         <!-- Conteúdo principal -->
         <main class="main-content">
@@ -196,7 +197,7 @@
                         <option value="">Categoria</option>
                         <option value="filtros">Filtros</option>
                         <option value="pastilhas">Pastilhas</option>
-                        <option value="suspencao">Suspenção</option>
+                        <option value="suspensao">Suspensão</option>
                         <option value="velas">Velas</option>
                         <option value="correias">Correias</option>
                         <option value="rolamentos">Rolamentos e buchas</option>
@@ -333,7 +334,7 @@
                     <option value="">Selecione uma categoria</option>
                     <option value="filtros">Filtros</option>
                     <option value="pastilhas">Pastilhas</option>
-                    <option value="suspencao">Suspenção</option>
+                    <option value="suspensao">Suspensão</option>
                     <option value="velas">Velas</option>
                     <option value="correias">Correias</option>
                     <option value="rolamentos">Rolamentos e buchas</option>
@@ -345,6 +346,12 @@
 
                 <label for="quantidade">Quantidade:</label>
                 <input type="number" id="quantidade" name="quantidade" required>
+
+                <label for="preco">Preço Unitário:</label>
+                <input type="number" id="preco" name="preco" step="0.01" required>
+
+                <label for="fornecedor">Fornecedor:</label>
+                <input type="text" id="fornecedor" name="fornecedor" required>
 
                 <button type="submit">Salvar</button>
             </form>
@@ -364,7 +371,7 @@
                     <option value="">Selecione uma categoria</option>
                     <option value="filtros">Filtros</option>
                     <option value="pastilhas">Pastilhas</option>
-                    <option value="suspencao">Suspenção</option>
+                    <option value="suspensao">Suspensão</option>
                     <option value="velas">Velas</option>
                     <option value="correias">Correias</option>
                     <option value="rolamentos">Rolamentos e buchas</option>
@@ -377,11 +384,21 @@
                 <label for="edit-quantidade">Quantidade:</label>
                 <input type="number" id="edit-quantidade" name="edit-quantidade" required>
 
+                <label for="edit-preco">Preço Unitário:</label>
+                <input type="number" id="edit-preco" name="edit-preco" step="0.01" required>
+
+                <label for="edit-fornecedor">Fornecedor:</label>
+                <input type="text" id="edit-fornecedor" name="edit-fornecedor" required>
+
                 <button type="submit">Salvar</button>
             </form>
             <button class="btn-close" onclick="closePopup('popup-editar-item')">Fechar</button>
         </div>
     </div>
+
+    <div id="loading-indicator" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner"></div>
+      </div>
 
     <script>
         // Dados de exemplo
@@ -416,31 +433,36 @@
         }
 
         // Navegação entre abas
-        document.querySelectorAll('.menu-item').forEach(item => {
-            item.addEventListener('click', (e) => {
-                e.preventDefault();
-                const tabId = item.getAttribute('data-tab');
-                
-                // Remove active class from all tabs and menu items
-                document.querySelectorAll('.tab-content').forEach(tab => {
-                    tab.classList.remove('active');
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const tabId = item.getAttribute('data-tab');
+                    
+                    // Remove active class from all tabs and menu items
+                    document.querySelectorAll('.tab-content').forEach(tab => {
+                        tab.classList.remove('active');
+                    });
+                    document.querySelectorAll('.menu-item').forEach(menuItem => {
+                        menuItem.classList.remove('active');
+                    });
+                    
+                    // Add active class to selected tab and menu item
+                    document.getElementById(tabId).classList.add('active');
+                    item.classList.add('active');
+                    
+                    // Close mobile menu if open
+                    document.getElementById('menu-toggle').checked = false;
                 });
-                document.querySelectorAll('.menu-item').forEach(menuItem => {
-                    menuItem.classList.remove('active');
-                });
-                
-                // Add active class to selected tab and menu item
-                document.getElementById(tabId).classList.add('active');
-                item.classList.add('active');
-                
-                // Close mobile menu if open
-                document.getElementById('menu-toggle').checked = false;
             });
-        });
 
-        // Set dashboard as active by default
-        document.querySelector('[data-tab="dashboard"]').classList.add('active');
-        document.getElementById('dashboard').classList.add('active');
+            // Set dashboard as active by default
+            document.querySelector('[data-tab="dashboard"]').classList.add('active');
+            document.getElementById('dashboard').classList.add('active');
+            
+            // Carregar dados iniciais
+            loadData();
+        });
 
         // Função para carregar dados dinâmicos
         function loadData() {
@@ -452,9 +474,9 @@
 
             // Exemplo de carregamento de ordens recentes
             orders = [
-                { os: '001', cliente: 'João Silva', veiculo: 'Fiat Uno', servico: 'Troca de óleo', status: 'Em Andamento' },
-                { os: '002', cliente: 'Maria Oliveira', veiculo: 'Volkswagen Gol', servico: 'Alinhamento', status: 'Aguardando Peças' },
-                { os: '003', cliente: 'Carlos Souza', veiculo: 'Chevrolet Onix', servico: 'Revisão', status: 'Concluído' }
+                { os: '001', data: '2023-10-15', cliente: 'João Silva', veiculo: 'Fiat Uno', servico: 'Troca de óleo', valor: 150.00, status: 'em-andamento' },
+                { os: '002', data: '2023-10-16', cliente: 'Maria Oliveira', veiculo: 'Volkswagen Gol', servico: 'Alinhamento', valor: 120.00, status: 'aguardando' },
+                { os: '003', data: '2023-10-17', cliente: 'Carlos Souza', veiculo: 'Chevrolet Onix', servico: 'Revisão', valor: 350.00, status: 'concluido' }
             ];
 
             const recentOrdersBody = document.getElementById('recent-orders-body');
@@ -464,7 +486,7 @@
                     <td>${order.cliente}</td>
                     <td>${order.veiculo}</td>
                     <td>${order.servico}</td>
-                    <td><span class="status ${order.status.toLowerCase().replace(' ', '-')}">${order.status}</span></td>
+                    <td><span class="status ${order.status}">${getStatusText(order.status)}</span></td>
                     <td>
                         <button class="btn-icon" onclick="changeStatus('${order.os}', 'em-andamento')">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
@@ -472,8 +494,30 @@
                         <button class="btn-icon" onclick="changeStatus('${order.os}', 'aguardando')">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
                         </button>
-                        <button class="btn-icon" onclick="removeVehicle('${order.os}')">
+                        <button class="btn-icon" onclick="removeOrder('${order.os}')">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+            
+            // Preencher a tabela de ordens
+            const ordersBody = document.getElementById('orders-body');
+            ordersBody.innerHTML = orders.map(order => `
+                <tr>
+                    <td>${order.os}</td>
+                    <td>${formatDate(order.data)}</td>
+                    <td>${order.cliente}</td>
+                    <td>${order.veiculo}</td>
+                    <td>${order.servico}</td>
+                    <td>R$ ${order.valor.toFixed(2)}</td>
+                    <td><span class="status ${order.status}">${getStatusText(order.status)}</span></td>
+                    <td class="actions">
+                        <button class="btn-icon" onclick="editOrder('${order.os}')">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                        </button>
+                        <button class="btn-icon" onclick="removeOrder('${order.os}')">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                         </button>
                     </td>
                 </tr>
@@ -481,20 +525,21 @@
 
             // Exemplo de carregamento de veículos
             vehicles = [
-                { marca: 'Fiat', placa: 'ABC-1234', cliente: 'João Silva', data: '2023-10-01' },
-                { marca: 'Volkswagen', placa: 'DEF-5678', cliente: 'Maria Oliveira', data: '2023-10-02' }
+                { marca: 'Fiat', modelo: 'Uno', placa: 'ABC-1234', cliente: 'João Silva', data: '2023-10-01' },
+                { marca: 'Volkswagen', modelo: 'Gol', placa: 'DEF-5678', cliente: 'Maria Oliveira', data: '2023-10-02' }
             ];
 
             const vehiclesGrid = document.getElementById('vehicles-grid');
             vehiclesGrid.innerHTML = vehicles.map(vehicle => `
                 <div class="vehicle-card">
                     <div class="vehicle-info">
-                        <h3>${vehicle.marca}</h3>
-                        <p>${vehicle.placa}</p>
-                        <p>${vehicle.cliente}</p>
-                        <p>${vehicle.data}</p>
+                        <h3>${vehicle.marca} ${vehicle.modelo}</h3>
+                        <p><strong>Placa:</strong> ${vehicle.placa}</p>
+                        <p><strong>Cliente:</strong> ${vehicle.cliente}</p>
+                        <p><strong>Data:</strong> ${formatDate(vehicle.data)}</p>
                     </div>
                     <div class="vehicle-actions">
+                        <button class="btn-secondary" onclick="viewVehicleHistory('${vehicle.placa}')">Histórico</button>
                         <button class="btn-icon" onclick="deleteVehicle('${vehicle.placa}')">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                         </button>
@@ -513,10 +558,10 @@
                 <div class="client-card">
                     <div class="client-info">
                         <h3>${client.nome}</h3>
-                        <p>${client.cpf}</p>
-                        <p>${client.telefone}</p>
-                        <p>${client.email}</p>
-                        <p>${client.veiculos} veículo(s)</p>
+                        <p><strong>CPF:</strong> ${client.cpf}</p>
+                        <p><strong>Telefone:</strong> ${client.telefone}</p>
+                        <p><strong>Email:</strong> ${client.email}</p>
+                        <p><strong>Veículos:</strong> ${client.veiculos}</p>
                     </div>
                     <div class="client-actions">
                         <button class="btn-secondary" onclick="viewClientDetails('${client.cpf}')">Mais Detalhes</button>
@@ -527,8 +572,8 @@
 
             // Exemplo de carregamento de estoque
             inventory = [
-                { id: 'P001', item: 'Filtro de Óleo', categoria: 'Filtros', quantidade: 15, preco: 35.00, fornecedor: 'AutoPeças Ltda', status: 'Em Estoque' },
-                { id: 'P002', item: 'Pastilhas de Freio', categoria: 'Pastilhas', quantidade: 10, preco: 120.00, fornecedor: 'Freios & Cia', status: 'Em Estoque' }
+                { id: 'P001', item: 'Filtro de Óleo', categoria: 'Filtros', quantidade: 15, preco: 35.00, fornecedor: 'AutoPeças Ltda', status: 'em-estoque' },
+                { id: 'P002', item: 'Pastilhas de Freio', categoria: 'Pastilhas', quantidade: 10, preco: 120.00, fornecedor: 'Freios & Cia', status: 'em-estoque' }
             ];
 
             const inventoryBody = document.getElementById('inventory-body');
@@ -540,7 +585,7 @@
                     <td>${item.quantidade}</td>
                     <td>R$ ${item.preco.toFixed(2)}</td>
                     <td>${item.fornecedor}</td>
-                    <td><span class="status ${item.status.toLowerCase().replace(' ', '-')}">${item.status}</span></td>
+                    <td><span class="status ${item.status}">Em Estoque</span></td>
                     <td class="actions">
                         <button class="btn-icon" onclick="editInventoryItemPopup('${item.id}')">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
@@ -551,9 +596,40 @@
                     </td>
                 </tr>
             `).join('');
+            
+            // Preencher os selects dos formulários
+            const clienteSelect = document.getElementById('cliente');
+            const clienteVeiculoSelect = document.getElementById('cliente-veiculo');
+            
+            clienteSelect.innerHTML = '<option value="">Selecione um cliente</option>' + 
+                clients.map(client => `<option value="${client.nome}">${client.nome}</option>`).join('');
+                
+            clienteVeiculoSelect.innerHTML = '<option value="">Selecione um cliente</option>' + 
+                clients.map(client => `<option value="${client.nome}">${client.nome}</option>`).join('');
+                
+            const veiculoSelect = document.getElementById('veiculo');
+            veiculoSelect.innerHTML = '<option value="">Selecione um veículo</option>' + 
+                vehicles.map(vehicle => `<option value="${vehicle.marca} ${vehicle.modelo}">${vehicle.marca} ${vehicle.modelo} (${vehicle.placa})</option>`).join('');
         }
 
-        // Função para alterar o status de um veículo
+        // Função para formatar data
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('pt-BR');
+        }
+        
+        // Função para obter texto do status
+        function getStatusText(status) {
+            switch(status) {
+                case 'em-andamento': return 'Em Andamento';
+                case 'aguardando': return 'Aguardando';
+                case 'concluido': return 'Concluído';
+                case 'em-estoque': return 'Em Estoque';
+                default: return status;
+            }
+        }
+
+        // Função para alterar o status de uma ordem
         function changeStatus(os, status) {
             const order = orders.find(o => o.os === os);
             if (order) {
@@ -562,8 +638,8 @@
             }
         }
 
-        // Função para remover um veículo
-        function removeVehicle(os) {
+        // Função para remover uma ordem
+        function removeOrder(os) {
             orders = orders.filter(o => o.os !== os);
             loadData();
         }
@@ -576,7 +652,7 @@
 
         // Função para enviar e-mail
         function sendEmail(email) {
-            window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${email}`, '_blank');
+            window.open(`mailto:${email}`, '_blank');
         }
 
         // Função para filtrar ordens de serviço
@@ -590,7 +666,7 @@
                                      order.veiculo.toLowerCase().includes(searchText) ||
                                      order.servico.toLowerCase().includes(searchText);
 
-                const matchesStatus = filterStatus ? order.status.toLowerCase() === filterStatus : true;
+                const matchesStatus = filterStatus ? order.status === filterStatus : true;
 
                 return matchesSearch && matchesStatus;
             });
@@ -599,17 +675,17 @@
             ordersBody.innerHTML = filteredOrders.map(order => `
                 <tr>
                     <td>${order.os}</td>
-                    <td>${order.data}</td>
+                    <td>${formatDate(order.data)}</td>
                     <td>${order.cliente}</td>
                     <td>${order.veiculo}</td>
                     <td>${order.servico}</td>
                     <td>R$ ${order.valor.toFixed(2)}</td>
-                    <td><span class="status ${order.status.toLowerCase().replace(' ', '-')}">${order.status}</span></td>
+                    <td><span class="status ${order.status}">${getStatusText(order.status)}</span></td>
                     <td class="actions">
                         <button class="btn-icon" onclick="editOrder('${order.os}')">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                         </button>
-                        <button class="btn-icon" onclick="deleteOrder('${order.os}')">
+                        <button class="btn-icon" onclick="removeOrder('${order.os}')">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                         </button>
                     </td>
@@ -636,14 +712,15 @@
             vehiclesGrid.innerHTML = filteredVehicles.map(vehicle => `
                 <div class="vehicle-card">
                     <div class="vehicle-info">
-                        <h3>${vehicle.marca}</h3>
-                        <p>${vehicle.placa}</p>
-                        <p>${vehicle.cliente}</p>
-                        <p>${vehicle.data}</p>
+                        <h3>${vehicle.marca} ${vehicle.modelo}</h3>
+                        <p><strong>Placa:</strong> ${vehicle.placa}</p>
+                        <p><strong>Cliente:</strong> ${vehicle.cliente}</p>
+                        <p><strong>Data:</strong> ${formatDate(vehicle.data)}</p>
                     </div>
                     <div class="vehicle-actions">
+                        <button class="btn-secondary" onclick="viewVehicleHistory('${vehicle.placa}')">Histórico</button>
                         <button class="btn-icon" onclick="deleteVehicle('${vehicle.placa}')">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2   stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                         </button>
                     </div>
                 </div>
@@ -665,10 +742,10 @@
                 <div class="client-card">
                     <div class="client-info">
                         <h3>${client.nome}</h3>
-                        <p>${client.cpf}</p>
-                        <p>${client.telefone}</p>
-                        <p>${client.email}</p>
-                        <p>${client.veiculos} veículo(s)</p>
+                        <p><strong>CPF:</strong> ${client.cpf}</p>
+                        <p><strong>Telefone:</strong> ${client.telefone}</p>
+                        <p><strong>Email:</strong> ${client.email}</p>
+                        <p><strong>Veículos:</strong> ${client.veiculos}</p>
                     </div>
                     <div class="client-actions">
                         <button class="btn-secondary" onclick="viewClientDetails('${client.cpf}')">Mais Detalhes</button>
@@ -701,7 +778,7 @@
                     <td>${item.quantidade}</td>
                     <td>R$ ${item.preco.toFixed(2)}</td>
                     <td>${item.fornecedor}</td>
-                    <td><span class="status ${item.status.toLowerCase().replace(' ', '-')}">${item.status}</span></td>
+                    <td><span class="status ${item.status}">Em Estoque</span></td>
                     <td class="actions">
                         <button class="btn-icon" onclick="editInventoryItemPopup('${item.id}')">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
@@ -728,7 +805,7 @@
             const newOrder = { os, data, cliente, veiculo, servico, valor, status };
             orders.push(newOrder);
 
-            filterOrders();
+            loadData();
             closePopup('popup-nova-ordem');
         }
 
@@ -740,10 +817,10 @@
             const cliente = document.getElementById('cliente-veiculo').value;
             const data = document.getElementById('data-veiculo').value;
 
-            const newVehicle = { marca, placa, cliente, data };
+            const newVehicle = { marca, modelo: '', placa, cliente, data };
             vehicles.push(newVehicle);
 
-            filterVehicles();
+            loadData();
             closePopup('popup-novo-veiculo');
         }
 
@@ -759,7 +836,7 @@
             const newClient = { nome, cpf, telefone, email, veiculos: quantidadeVeiculos };
             clients.push(newClient);
 
-            filterClients();
+            loadData();
             closePopup('popup-novo-cliente');
         }
 
@@ -769,11 +846,21 @@
             const item = document.getElementById('item').value;
             const categoria = document.getElementById('categoria').value;
             const quantidade = parseInt(document.getElementById('quantidade').value);
+            const preco = parseFloat(document.getElementById('preco').value);
+            const fornecedor = document.getElementById('fornecedor').value;
 
-            const newItem = { id: `P${inventory.length + 1}`, item, categoria, quantidade, preco: 0, fornecedor: '', status: 'Em Estoque' };
+            const newItem = { 
+                id: `P${inventory.length + 1}`.padStart(4, '0'), 
+                item, 
+                categoria, 
+                quantidade, 
+                preco, 
+                fornecedor, 
+                status: 'em-estoque' 
+            };
             inventory.push(newItem);
 
-            filterInventory();
+            loadData();
             closePopup('popup-novo-item');
         }
 
@@ -785,6 +872,8 @@
                 document.getElementById('edit-item').value = item.item;
                 document.getElementById('edit-categoria').value = item.categoria;
                 document.getElementById('edit-quantidade').value = item.quantidade;
+                document.getElementById('edit-preco').value = item.preco;
+                document.getElementById('edit-fornecedor').value = item.fornecedor;
 
                 openPopup('popup-editar-item');
             }
@@ -797,20 +886,22 @@
             const item = document.getElementById('edit-item').value;
             const categoria = document.getElementById('edit-categoria').value;
             const quantidade = parseInt(document.getElementById('edit-quantidade').value);
+            const preco = parseFloat(document.getElementById('edit-preco').value);
+            const fornecedor = document.getElementById('edit-fornecedor').value;
 
             const index = inventory.findIndex(i => i.id === itemId);
             if (index !== -1) {
-                inventory[index] = { ...inventory[index], item, categoria, quantidade };
+                inventory[index] = { ...inventory[index], item, categoria, quantidade, preco, fornecedor };
             }
 
-            filterInventory();
+            loadData();
             closePopup('popup-editar-item');
         }
 
         // Função para excluir um item do estoque
         function deleteInventoryItem(itemId) {
             inventory = inventory.filter(item => item.id !== itemId);
-            filterInventory();
+            loadData();
         }
 
         // Função para visualizar o histórico de um veículo
@@ -826,8 +917,11 @@
             }
         }
 
-        // Carregar dados ao carregar a página
-        window.onload = loadData;
+        // Função para editar uma ordem
+        function editOrder(os) {
+            alert(`Editar ordem ${os} - Funcionalidade em desenvolvimento`);
+        }
     </script>
 </body>
 </html>
+
